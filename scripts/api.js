@@ -1,15 +1,17 @@
 (function () {
     // Mock repository
-	let adverts = [
+    let adverts = [
         {
             _id: 0,
             _acl: {
                 creator: 0
             },
             title: "XBoss 1080",
+			description: "Modded gaming console",
             publisher: "Pesho",
             datePublished: "2017-06-04",
             price: 100
+			image: "./static/fuze-f1.png"
         }
     ];
 
@@ -40,6 +42,7 @@
         }
     ];
 
+
     // User login
     $.mockjax(function (requestSettings) {
         if (requestSettings.url === "https://mock.api.com/user/kid_rk/login") {
@@ -64,7 +67,7 @@
 
     // User create
     $.mockjax(function (requestSettings) {
-        if (requestSettings.url === "https://mock.api.com/user/kid_rk/"  &&
+        if (requestSettings.url === "https://mock.api.com/user/kid_rk/" &&
             requestSettings.method === "POST") {
             return {
                 response: function (origSettings) {
@@ -92,8 +95,8 @@
             };
         }
     });
-	
-	    // Get user info
+
+    // Get user info
     $.mockjax(function (requestSettings) {
         if (requestSettings.url.match(/https:\/\/mock\.api\.com\/user\/kid_rk\/(.+)/)) {
             let userId = requestSettings.url.match(/https:\/\/mock\.api\.com\/user\/kid_rk\/(.+)/)[1];
@@ -113,7 +116,7 @@
 
     // Loading of adverts
     $.mockjax(function (requestSettings) {
-        if (requestSettings.url==="https://mock.api.com/appdata/kid_rk/adverts" &&
+        if (requestSettings.url === "https://mock.api.com/appdata/kid_rk/adverts" &&
             requestSettings.method === "GET") {
             return {
                 response: function (origSettings) {
@@ -128,7 +131,7 @@
         }
     });
 
-	    // Create advert
+    // Create advert
     $.mockjax(function (requestSettings) {
         if (requestSettings.url === "https://mock.api.com/appdata/kid_rk/adverts" &&
             requestSettings.method === "POST") {
@@ -148,6 +151,7 @@
                                 creator: creator
                             },
                             title: data.title,
+                            description: data.description,
                             publisher: data.publisher,
                             datePublished: data.datePublished,
                             price: data.price
@@ -182,6 +186,24 @@
         }
     });
 
+    // Load single advert
+    $.mockjax(function (requestSettings) {
+        if (requestSettings.url.match(/https:\/\/mock\.api\.com\/appdata\/kid_rk\/adverts\/(.+)/) &&
+            requestSettings.method === "GET") {
+            let advertId = Number(requestSettings.url.match(/https:\/\/mock\.api\.com\/appdata\/kid_rk\/adverts\/(.+)/)[1]);
+            return {
+                response: function (origSettings) {
+                    if (requestSettings.headers["Authorization"].includes("Kinvey mock_token")) {
+                        let advert = adverts.filter(a => a._id === advertId);
+                        this.responseText = advert.shift();
+                    } else {
+                        this.status = 403;
+                        this.responseText = "You are not authorized";
+                    }
+                }
+            };
+        }
+    });
 
     // Edit advert
     $.mockjax(function (requestSettings) {
@@ -196,9 +218,11 @@
                         if (advert.length > 0) {
                             advert = advert[0];
                             advert.title = data.title;
+                            advert.description = data.description;
                             advert.publisher = data.publisher;
                             advert.datePublished = data.datePublished;
                             advert.price = data.price;
+							advert.image = data.image;
                             this.responseText = advert;
                         }
                         this.responseText = {};
@@ -211,4 +235,22 @@
         }
     });
 
+	    // Load single advert
+    $.mockjax(function (requestSettings) {
+        if (requestSettings.url.match(/https:\/\/mock\.api\.com\/appdata\/kid_rk\/adverts\/(.+)/) &&
+            requestSettings.method === "GET") {
+            let advertId = Number(requestSettings.url.match(/https:\/\/mock\.api\.com\/appdata\/kid_rk\/adverts\/(.+)/)[1]);
+            return {
+                response: function (origSettings) {
+                    if (requestSettings.headers["Authorization"].includes("Kinvey mock_token")) {
+                        let advert = adverts.filter(a => a._id === advertId);
+                        this.responseText = advert.shift();
+                    } else {
+                        this.status = 403;
+                        this.responseText = "You are not authorized";
+                    }
+                }
+            };
+        }
+    });
 })();
